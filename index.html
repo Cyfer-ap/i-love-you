@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Love You</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #f9e7f7; /* Soft pink background */
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .gallery {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
+        }
+        .photo {
+            position: absolute;
+            width: 250px; /* Larger photos for better visibility */
+            height: 250px;
+            border-radius: 15px; /* Slightly rounded corners */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: slideInOut 8s infinite ease-in-out;
+        }
+
+        /* Different Slide Animations */
+        @keyframes slideInOut {
+            0% {
+                transform: translateX(-100%) scale(0.8);
+                opacity: 0;
+            }
+            10% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            90% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100%) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Unique Animations for Each Photo */
+        .photo:nth-child(even) {
+            animation-name: slideFromRight;
+        }
+
+        .photo:nth-child(odd) {
+            animation-name: slideFromLeft;
+        }
+
+        .photo:nth-child(3n) {
+            animation-name: fadeInOut;
+        }
+
+        .photo:nth-child(5n) {
+            animation-name: zoomInOut;
+        }
+
+        /* Slide from Left */
+        @keyframes slideFromLeft {
+            0% {
+                transform: translateX(-100%) scale(0.8);
+                opacity: 0;
+            }
+            10% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            90% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Slide from Right */
+        @keyframes slideFromRight {
+            0% {
+                transform: translateX(100%) scale(0.8);
+                opacity: 0;
+            }
+            10% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            90% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-100%) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Fade In and Out */
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Zoom In and Out */
+        @keyframes zoomInOut {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            90% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        h1 {
+            position: absolute;
+            top: 20px;
+            font-size: 36px;
+            color: #ff4d6d;
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+<h1>❤️ I Love You Baby Girl ❤️</h1>
+<div class="gallery">
+    <!-- Photos -->
+</div>
+
+<script>
+    // Array of image URLs (replace with your own images)
+    const images = [
+        'img/1732462818083.jpg',
+        'img/1732462818106.jpg',
+        'img/1732462818197.jpg',
+        'img/1732462818271.jpg',
+        'img/1739711526560.jpg',
+        'img/1739711526680.jpg',
+        'img/1739711527035.jpg',
+        'img/1745317469465.jpg',
+        'img/1745681882983.jpg',
+        'img/1745770859105.jpg',
+    ];
+
+    // Function to check if two photos collide
+    function isColliding(rect1, rect2) {
+        return !(
+            rect1.left + rect1.width <= rect2.left ||
+            rect1.left >= rect2.left + rect2.width ||
+            rect1.top + rect1.height <= rect2.top ||
+            rect1.top >= rect2.top + rect2.height
+        );
+    }
+
+    // Function to generate non-overlapping random positions
+    function getRandomPosition(existingPositions, photoSize) {
+        let position;
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        do {
+            const top = Math.random() * 60 + 10; // Random top position between 10% and 70%
+            const left = Math.random() > 0.5
+                ? Math.random() * 30 + 10 // Left side
+                : Math.random() * 30 + 60; // Right side
+            position = {
+                top: `${top}%`,
+                left: `${left}%`,
+                rect: {
+                    top: top * window.innerHeight / 100,
+                    left: left * window.innerWidth / 100,
+                    width: photoSize.width,
+                    height: photoSize.height
+                }
+            };
+
+            attempts++;
+            if (attempts > maxAttempts) break; // Prevent infinite loops
+
+        } while (existingPositions.some(pos => isColliding(position.rect, pos.rect)));
+
+        return position;
+    }
+
+    // Function to create and append photos dynamically
+    function createPhotos() {
+        const gallery = document.querySelector('.gallery');
+        const existingPositions = [];
+        const photoSize = { width: 250, height: 250 }; // Size of each photo in pixels
+
+        images.forEach((image, index) => {
+            const photo = document.createElement('div');
+            photo.classList.add('photo');
+            photo.style.backgroundImage = `url('${image}')`;
+
+            // Assign non-overlapping random position
+            const position = getRandomPosition(existingPositions, photoSize);
+            photo.style.top = position.top;
+            photo.style.left = position.left;
+
+            // Store the position for collision detection
+            existingPositions.push(position);
+
+            // Assign unique animation delay
+            photo.style.animationDelay = `${index * 1}s`;
+
+            // Append to the gallery
+            gallery.appendChild(photo);
+        });
+    }
+
+    // Initialize the gallery
+    createPhotos();
+</script>
+</body>
+</html>
